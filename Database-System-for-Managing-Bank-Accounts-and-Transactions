@@ -1,0 +1,112 @@
+PROJETO FLEXEMPRESTA
+
+Criando o modelo físico
+
+CREATE TABLE tb_departamento(
+id_departamento VARCHAR(11),
+nm_departamento VARCHAR(60) CONSTRAINT nn_tb_departamento_nm_departamento NOT NULL,
+nr_departamento INTEGER CONSTRAINT nn_tb_departamento_nr_departamento NOT NULL
+                        CONSTRAINT uq_tb_departamento_nr_departamento UNIQUE,
+CONSTRAINT pk_tb_departamento_id_departamento PRIMARY KEY (id_departamento)
+);
+
+
+CREATE TABLE tb_colaborador(
+id_colaborador   VARCHAR(11),
+nm_colaborador  VARCHAR(60) CONSTRAINT nn_tb_colaborador_nm_colaborador NOT NULL,
+cpf_colaborador VARCHAR(11) CONSTRAINT nn_tb_colaborador_cpf_colaborador NOT NULL
+                            CONSTRAINT uq_tb_colaborador_cpf_colaborador UNIQUE,
+telefone        VARCHAR(11) CONSTRAINT nn_tb_colaborador_telefone NOT NULL,
+salario         DECIMAL(10,2) CONSTRAINT nn_tb_colaborador_salario NOT NULL,
+email           VARCHAR(60) CONSTRAINT nn_tb_colaborador_email NOT NULL
+                            CONSTRAINT uq_tb_colaborador_email UNIQUE,
+cargo           VARCHAR(25) CONSTRAINT nn_tb_colaborador_cargo NOT NULL,
+id_departamento VARCHAR(11),
+CONSTRAINT pk_tb_colaborador_id_colaborador PRIMARY KEY (id_colaborador),
+CONSTRAINT fk_tb_colaborador_id_departamento FOREIGN KEY (id_departamento) REFERENCES tb_departamento (id_departamento)
+);
+
+
+CREATE TABLE tb_cliente(
+id_cliente      VARCHAR(11),
+nm_cliente      VARCHAR(60) CONSTRAINT nn_tb_cliente_nm_cliente NOT NULL,
+cpf_cliente     VARCHAR(11) CONSTRAINT nn_tb_cliente_cpf_cliente NOT NULL
+                            CONSTRAINT uq_tb_cliente_cpf_cliente UNIQUE,
+email           VARCHAR(60) CONSTRAINT nn_tb_cliente_email NOT NULL
+                            CONSTRAINT uq_tb_cliente_email UNIQUE,
+dt_nascimento   DATE CONSTRAINT nn_tb_cliente_dt_nascimento NOT NULL
+                     CONSTRAINT ck_tb_cliente_dt_nascimento CHECK(EXTRACT(YEAR FROM AGE(current_date, dt_nascimento)) >= 18),
+rua             VARCHAR(60) CONSTRAINT nn_tb_cliente_rua NOT NULL,
+bairro          VARCHAR(25) CONSTRAINT nn_tb_cliente_bairro NOT NULL,
+cidade          VARCHAR(25) CONSTRAINT nn_tb_cliente_cidade NOT NULL,
+estado          VARCHAR(2) CONSTRAINT nn_tb_cliente_estado NOT NULL,
+cep             VARCHAR(8) CONSTRAINT nn_tb_cliente_cep NOT NULL,
+id_colaborador  VARCHAR(11),
+CONSTRAINT pk_tb_cliente_id_cliente PRIMARY KEY (id_cliente),
+CONSTRAINT fk_tb_cliente_id_colaborador FOREIGN KEY (id_colaborador) REFERENCES tb_colaborador (id_colaborador)
+);
+
+
+CREATE TABLE tb_score_credito(
+id_score_credito VARCHAR(11),
+dt_consulta      DATE CONSTRAINT nn_tb_score_credito_dt_consulta NOT NULL,
+fonte            VARCHAR(60) CONSTRAINT nn_tb_score_credito_fonte NOT NULL,
+pontuacao        FLOAT CONSTRAINT nn_tb_score_credito_pontuacao NOT NULL,
+justificativa    VARCHAR(60),
+id_cliente       VARCHAR(11),
+CONSTRAINT pk_tb_score_credito_id_score_credito PRIMARY KEY (id_score_credito),
+CONSTRAINT fk_tb_score_credito_id_cliente FOREIGN KEY (id_cliente) REFERENCES tb_cliente (id_cliente)
+);
+
+
+CREATE TABLE tb_telefone(
+id_telefone VARCHAR(11),
+telefone    VARCHAR(11) CONSTRAINT nn_tb_telefone_telefone NOT NULL,
+id_cliente  VARCHAR(11),
+CONSTRAINT pk_tb_telefone_id_telefone PRIMARY KEY (id_telefone),
+CONSTRAINT fk_tb_telefone_id_cliente FOREIGN KEY (id_cliente) REFERENCES tb_cliente (id_cliente)
+);
+
+
+CREATE TABLE tb_emprestimo(
+id_emprestimo    VARCHAR(11),
+dt_inicio        DATE CONSTRAINT nn_tb_emprestimo_dt_inicio NOT NULL,
+prazo            INTEGER CONSTRAINT nn_tb_emprestimo_prazo NOT NULL,
+valor            DECIMAL(10,2) CONSTRAINT nn_tb_emprestimo_valor NOT NULL,
+status           BOOLEAN CONSTRAINT nn_tb_emprestimo_status NOT NULL,
+tipo             VARCHAR(25) CONSTRAINT nn_tb_emprestimo_tipo NOT NULL,
+id_cliente       VARCHAR(11),
+CONSTRAINT pk_tb_emprestimo_id_emprestimo PRIMARY KEY (id_emprestimo),
+CONSTRAINT fk_tb_emprestimo_id_cliente FOREIGN KEY (id_cliente) REFERENCES tb_cliente (id_cliente)
+);
+
+
+CREATE TABLE tb_pagamento(
+id_pagamento     VARCHAR(11),
+dt_pagamento     DATE CONSTRAINT nn_tb_pagamento_dt_pagamento NOT NULL,
+status           VARCHAR(20) CONSTRAINT nn_tb_pagamento_status NOT NULL,
+valor            DECIMAL(10,2) CONSTRAINT nn_tb_pagamento_valor NOT NULL,
+id_emprestimo    VARCHAR(11),
+CONSTRAINT pk_tb_pagamento_id_pagamento PRIMARY KEY (id_pagamento),
+CONSTRAINT fk_tb_pagamento_id_emprestimo FOREIGN KEY (id_emprestimo) REFERENCES tb_emprestimo (id_emprestimo)
+);
+
+
+CREATE TABLE tb_conta(
+id_conta     VARCHAR(11),
+tipo         VARCHAR(25) CONSTRAINT nn_tb_conta_tipo NOT NULL,
+nr_conta     INTEGER CONSTRAINT nn_tb_conta_nr_conta NOT NULL
+                     CONSTRAINT uq_tb_conta_nr_conta UNIQUE,
+dt_abertura  DATE CONSTRAINT nn_tb_conta_dt_abertura NOT NULL,
+saldo        DECIMAL(10,2) CONSTRAINT nn_tb_conta_saldo NOT NULL,
+CONSTRAINT pk_tb_conta_id_conta PRIMARY KEY (id_conta)
+);
+
+
+CREATE TABLE tb_cliente_conta(
+id_cliente   VARCHAR(11),
+id_conta     VARCHAR(11),
+CONSTRAINT pk_tb_cliente_conta_id_cliente_id_conta PRIMARY KEY (id_cliente, id_conta),
+CONSTRAINT fk_tb_cliente_conta_id_cliente FOREIGN KEY (id_cliente) REFERENCES tb_cliente (id_cliente),
+CONSTRAINT fk_tb_cliente_conta_id_conta FOREIGN KEY (id_conta) REFERENCES tb_conta (id_conta)
+);
