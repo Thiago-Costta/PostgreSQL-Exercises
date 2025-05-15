@@ -1,0 +1,114 @@
+CREATE TABLE tb_empresa(
+CNPJ          VARCHAR(14),
+nm_empresa    VARCHAR(30),
+email_empresa VARCHAR(50),
+CONSTRAINT pk_tb_empresa_cnpj PRIMARY KEY (CNPJ)
+);
+
+CREATE TABLE tb_telefone(
+id_telefone  VARCHAR(20),
+telefone     VARCHAR(11),
+CNPJ         VARCHAR(14),
+CONSTRAINT pk_tb_telefone_id_telefone PRIMARY KEY (id_telefone),
+CONSTRAINT fk_tb_telefone_cnpj FOREIGN KEY (CNPJ) 
+           REFERENCES tb_empresa(CNPJ)
+);
+
+CREATE TABLE tb_entrevista(
+id_entrevista VARCHAR(20),
+dt_entrevista DATE,
+CNPJ          VARCHAR(14),
+CONSTRAINT pk_tb_entrevista_id_entrevista PRIMARY KEY (id_entrevista),
+CONSTRAINT fk_tb_entrevista_cnpj FOREIGN KEY (CNPJ)
+           REFERENCES tb_empresa(CNPJ)
+);
+
+CREATE TABLE tb_pcd(
+CPF      VARCHAR(11),
+email    VARCHAR(50),
+telefone VARCHAR(11),
+rua      VARCHAR(50),
+bairro   VARCHAR(25),
+cidade   VARCHAR(20),
+CONSTRAINT pk_tb_pcd_cpf PRIMARY KEY (CPF)
+);
+
+CREATE TABLE tb_postar_feed(
+id_postagem  VARCHAR(20),
+CPF          VARCHAR(11),
+CNPJ         VARCHAR(14),
+foto         BYTEA,
+video        BYTEA,
+obs_postagem VARCHAR(150),
+CONSTRAINT pk_tb_postar_feed_id_postagem PRIMARY KEY (id_postagem),
+CONSTRAINT fk_tb_postar_feed_cnpj FOREIGN KEY (CNPJ)
+           REFERENCES tb_empresa(CNPJ),
+CONSTRAINT fk_tb_postar_feed_cpf FOREIGN KEY (CPF)
+   		   REFERENCES tb_pcd(CPF)
+);
+
+CREATE TABLE tb_formulario(
+id_formulario      VARCHAR(20),
+dt_preenchimeto    DATE,
+obs_pcd            VARCHAR(50),
+obs_acessibilidade VARCHAR(50),
+CPF                VARCHAR(11),
+CNPJ               VARCHAR(14),
+CONSTRAINT pk_tb_formulario_id_formulario PRIMARY KEY (id_formulario),
+CONSTRAINT fk_tb_formulario_cpf FOREIGN KEY (CPF)
+		   REFERENCES tb_pcd(CPF),
+CONSTRAINT fk_tb_formulario_cnpj FOREIGN KEY (CNPJ)
+		   REFERENCES tb_empresa(CNPJ)
+);
+
+CREATE TABLE tb_vaga(
+id_vaga       VARCHAR(20),
+tipo_vaga     VARCHAR(25),
+obs_vaga      VARCHAR(70),
+salario       FLOAT,
+dt_publicacao DATE,
+CNPJ          VARCHAR(14),
+CONSTRAINT pk_tb_vaga_id_vaga PRIMARY KEY (id_vaga),
+CONSTRAINT fk_tb_vaga_cnpj FOREIGN KEY (CNPJ)
+		   REFERENCES tb_empresa(CNPJ)
+);
+
+CREATE TABLE tb_candidato(
+id_candidato   VARCHAR(20),
+obs_candidato  VARCHAR(50),
+id_vaga        VARCHAR(20),
+CONSTRAINT pk_tb_candidato_id_candidato PRIMARY KEY (id_candidato),
+CONSTRAINT fk_tb_candidato_id_vaga FOREIGN KEY (id_vaga)
+		   REFERENCES tb_vaga(id_vaga)
+);
+
+CREATE TABLE tb_aplicacao(
+CPF          VARCHAR(11),
+CNPJ         VARCHAR(14),
+dt_aplicacao DATE,
+CONSTRAINT pk_tb_aplicacao_cpf_cnpj PRIMARY KEY (CPF, CNPJ),
+CONSTRAINT fk_tb_aplicacao_cpf FOREIGN KEY (CPF)
+		   REFERENCES tb_pcd(CPF),
+CONSTRAINT fk_tb_aplicacao_cnpj FOREIGN KEY (CNPJ)
+		   REFERENCES tb_empresa(CNPJ)
+);
+
+CREATE TABLE tb_selecao(
+CNPJ         VARCHAR(14),
+id_candidato VARCHAR(20),
+CONSTRAINT pk_tb_selecao_cnpj_id_candidato PRIMARY KEY (CNPJ, id_candidato),
+CONSTRAINT fk_tb_selecao_cnpj FOREIGN KEY (CNPJ)
+		   REFERENCES tb_empresa(CNPJ),
+CONSTRAINT fk_tb_selecao_id_candidato FOREIGN KEY (id_candidato)
+		   REFERENCES tb_candidato(id_candidato)
+);
+
+CREATE TABLE tb_participacao(
+id_entrevista  VARCHAR(20),
+id_candidato   VARCHAR(20),
+CONSTRAINT pk_tb_participacao_id_entrevista_id_candidato PRIMARY KEY (id_entrevista, id_candidato),
+CONSTRAINT fk_tb_participacao_id_entrevista FOREIGN KEY (id_entrevista)
+		   REFERENCES tb_entrevista(id_entrevista),
+CONSTRAINT fk_tb_participacao_id_candidato FOREIGN KEY (id_candidato)
+		   REFERENCES tb_candidato(id_candidato)
+);
